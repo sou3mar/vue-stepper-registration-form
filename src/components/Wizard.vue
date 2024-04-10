@@ -1,30 +1,53 @@
 <template>
-    <div>
-       <h1>Step: {{ headerMessage }}</h1>
-       <div v-if="step === 1">
-        <label for="username">Username: </label>
-        <input  type="text" id="username" v-model="username" />
-        <p v-if="!isUsernameValid" class="error">Invalid Username.</p>
-       </div>
+  <div class="container w-96 mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-4">Step: {{ headerMessage }}</h1>
 
-       <div v-if="step === 2">
-        <label for="email">Email: </label>
-        <input v-if="step === 2" type="text" id="email" v-model="email" />
-        <p v-if="step === 2 && !isEmailValid" class="error">Invalid email address.</p>
-       </div>
-
-       <div>
-        <button id="btn-prev" @click="prevStep" :disabled="step == 1">Prev</button>
-        <button id="btn-next" :disabled="!isNextEnabled" @click="nextStep">Next</button>
-       </div>
-
-       <div v-if="step === 3">
-        <p>Username: {{ username }}</p>
-        <p>Email: {{ email }}</p>
-       </div>
-       
-       
+    <div v-if="step === 1">
+      <label for="username" class="block mb-2 text-sm font-medium">Username:</label>
+      <input
+        type="text"
+        id="username"
+        v-model="username"
+        class="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+      />
+      <p v-if="!isUsernameValid" class="text-red-500 text-xs mt-1">Invalid Username.</p>
     </div>
+
+    <div v-if="step === 2">
+      <label for="email" class="block mb-2 text-sm font-medium">Email:</label>
+      <input
+        type="text"
+        id="email"
+        v-model="email"
+        class="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+      />
+      <p v-if="step === 2 && !isEmailValid" class="text-red-500 text-xs mt-1">Invalid email address.</p>
+    </div>
+
+    <div class="flex justify-between mt-4 mb-4 flex-wrap md:flex-nowrap">
+      <button
+        id="btn-prev"
+        @click="prevStep"
+        :disabled="step === 1"
+        class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md cursor-pointer disabled:opacity-50 disabled:bg-gray-200"
+      >
+        Prev
+      </button>
+      <button
+        id="btn-next"
+        :disabled="!isNextEnabled"
+        @click="nextStep"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md cursor-pointer disabled:opacity-50"
+      >
+        Next
+      </button>
+    </div>
+
+    <div v-if="step === 3">
+      <p class="px-4">Username: {{ username }}</p>
+      <p class="px-4">Email: {{ email }}</p>
+    </div>
+  </div>
 </template>
    
    <script>
