@@ -1,16 +1,16 @@
 <template>
   <div class="container w-96 mx-auto px-4 py-8">
-    <h1 class="text-2xl font-bold mb-4">Step: {{ headerMessage }}</h1>
+    <h1 v-if="currentStep" class="text-2xl font-bold mb-4">Step: {{ currentStep.label }}</h1>
 
-    <div v-if="state.step <= 2">
-      <label :for="currentField.id" class="block mb-2 text-sm font-medium">{{ currentField.label }}:</label>
+    <div v-if="state.step < steps.length">
+      <label :for="currentStep.model" class="block mb-2 text-sm font-medium">{{ currentStep.label }}:</label>
       <input
-        :type="currentField.type"
-        :id="currentField.model"
-        v-model="state[currentField.model]"
+        :type="currentStep.type"
+        :id="currentStep.model"
+        v-model="state[currentStep.model]"
         class="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-      <p v-if="!state[currentField.valid]" class="text-red-500 text-xs mt-1">
-        {{ currentField.errorMessage }}
+      <p v-if="!state[currentStep.valid]" class="text-red-500 text-xs mt-1">
+        {{ currentStep.errorMessage }}
       </p>
     </div>
 
@@ -24,14 +24,14 @@
       </button>
       <button
         id="btn-next"
-        :disabled="!isNextEnabled"
+        :disabled="state.step === steps.length"
         @click="nextStep"
         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md cursor-pointer disabled:opacity-50">
         Next
       </button>
     </div>
 
-    <div v-if="state.step === 3">
+    <div v-if="state.step === steps.length">
       <p class="px-4">Username: {{ state.username }}</p>
       <p class="px-4">Email: {{ state.email }}</p>
     </div>
@@ -40,6 +40,31 @@
 
 <script>
   import { reactive, computed } from "vue"
+
+  // Define the steps of the wizard form
+  const steps = [
+    {
+      label: "Username",
+      model: "username",
+      type: "text",
+      valid: "isUsernameValid",
+      validator: value => /^[a-zA-Z0-9_]{4,20}$/.test(value),
+      errorMessage: "Invalid Username."
+    },
+    {
+      label: "Email",
+      model: "email",
+      type: "text",
+      valid: "isEmailValid",
+      validator: value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+      errorMessage: "Invalid email address."
+    },
+    {
+      // last step is set to be the review step
+      // no input fields, just a review of the previous steps
+      label: "review"
+    }
+  ]
 
   export default {
     setup() {
@@ -51,65 +76,13 @@
         isEmailValid: true
       })
 
-      const headerMessage = computed(() => {
-        switch (state.step) {
-          case 1:
-            return "username"
-          case 2:
-            return "email"
-          case 3:
-            return "review"
-          default:
-            return ""
-        }
-      })
-
-      const isNextEnabled = computed(() => {
-        if (state.step === 3) return false
-        return true
-      })
-
-      const currentField = computed(() => {
-        switch (state.step) {
-          case 1:
-            return {
-              type: "text",
-              label: "Username",
-              model: "username",
-              valid: "isUsernameValid",
-              errorMessage: "Invalid Username."
-            }
-          case 2:
-            return {
-              type: "text",
-              label: "Email",
-              model: "email",
-              valid: "isEmailValid",
-              errorMessage: "Invalid email address."
-            }
-          default:
-            return {}
-        }
-      })
-
-      const validateUsername = () => {
-        const regex = /^[a-zA-Z0-9_]{4,20}$/
-        state.isUsernameValid = regex.test(state.username)
-      }
-
-      const validateEmail = () => {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        state.isEmailValid = regex.test(state.email)
-      }
+      const currentStep = computed(() => steps[state.step - 1])
 
       const nextStep = () => {
-        if (state.step === 1) {
-          validateUsername()
-          if (!state.isUsernameValid) return
-        }
-        if (state.step === 2) {
-          validateEmail()
-          if (!state.isEmailValid) return
+        if (state.step <= steps.length) {
+          const isValid = currentStep.value.validator(state[currentStep.value.model])
+          state[currentStep.value.valid] = isValid
+          if (!isValid) return
         }
         state.step++
       }
@@ -120,11 +93,8 @@
 
       return {
         state,
-        headerMessage,
-        isNextEnabled,
-        currentField,
-        validateUsername,
-        validateEmail,
+        steps,
+        currentStep,
         nextStep,
         prevStep
       }
