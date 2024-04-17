@@ -16,6 +16,12 @@
         timeoutId: null // Add timeoutId to data
       }
     },
+    watch: {
+      inputText: function () {
+        clearTimeout(this.timeoutId) // Clear the previous timeout
+        this.timeoutId = setTimeout(this.isBalanced, 50) // Set a new timeout
+      }
+    },
     methods: {
       isBalanced() {
         // Define the pairs of brackets to check for balance in the text
@@ -41,12 +47,6 @@
         }
 
         this.isTextBalanced = stack.length === 0
-      }
-    },
-    watch: {
-      inputText: function () {
-        clearTimeout(this.timeoutId) // Clear the previous timeout
-        this.timeoutId = setTimeout(this.isBalanced, 50) // Set a new timeout
       }
     }
   }

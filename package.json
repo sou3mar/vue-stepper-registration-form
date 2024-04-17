@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run lint && vite build",
     "preview": "vite preview",
     "test:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --e2e'",
     "test:e2e:dev": "start-server-and-test 'vite dev --port 4173' http://localhost:4173 'cypress open --e2e'",
     "test:unit": "cypress run --component",
-    "test:unit:dev": "cypress open --component"
+    "test:unit:dev": "cypress open --component",
+    "lint": "eslint 'src/**/*.{js,vue}'",
+    "lint:fix": "eslint 'src/**/*.{js,vue}' --fix"
   },
   "dependencies": {
     "vue": "^3.4.21",
@@ -20,6 +22,8 @@
     "@vitejs/plugin-vue": "^5.0.4",
     "autoprefixer": "^10.4.19",
     "cypress": "^13.7.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-vue": "^9.25.0",
     "postcss": "^8.4.38",
     "start-server-and-test": "^2.0.3",
     "tailwindcss": "^3.4.3",
