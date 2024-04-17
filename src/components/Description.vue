@@ -1,53 +1,52 @@
 <template>
   <div>
     <input id="description" v-model="inputText" />
-    <p v-if="isTextBalanced">{{ balancedMessage }}</p>
-    <p v-else>{{ unbalancedMessage }}</p>
+    <p v-if="isTextBalanced">The text is balanced.</p>
+    <p v-else>The text is not balanced.</p>
   </div>
 </template>
 
 <script>
+// using Options API in Vue3 so that Cypress can spy on isBalanced function call
 export default {
   data() {
     return {
       inputText: '',
       isTextBalanced: true,
-      balancedMessage: 'The text is balanced.',
-      unbalancedMessage: 'The text is not balanced.',
+      timeoutId: null, // Add timeoutId to data
     };
   },
   methods: {
     isBalanced() {
+      // Define the pairs of brackets to check for balance in the text
+      const pairs = {
+        ')': '(',
+        ']': '[',
+        '}': '{',
+      };
+
+      const openBrackets = new Set(Object.values(pairs));
       const stack = [];
+
+      // Iterate over each character in the input text to check for balance
       for (let char of this.inputText) {
-        if (char === '(' || char === '[' || char === '{') {
+        if (pairs[char]) {
+          if (stack.length === 0 || stack.pop() !== pairs[char]) {
+            this.isTextBalanced = false;
+            return;
+          }
+        } else if (openBrackets.has(char)) {
           stack.push(char);
-        } else if (char === ')' || char === ']' || char === '}') {
-          if (stack.length === 0) {
-            this.isTextBalanced = false;
-            return false;
-          }
-          const lastChar = stack.pop();
-          if (
-            (char === ')' && lastChar !== '(') ||
-            (char === ']' && lastChar !== '[') ||
-            (char === '}' && lastChar !== '{')
-          ) {
-            this.isTextBalanced = false;
-            return false;
-          }
         }
       }
 
       this.isTextBalanced = stack.length === 0;
-      return;
-    }
+    },
   },
   watch: {
-    inputText(val) {
-      if(val[val.length - 1] === '?') { // according to the test pattern and the condition that the isBalanced should be executed only once
-        this.isBalanced();
-      }
+    inputText: function () {
+      clearTimeout(this.timeoutId); // Clear the previous timeout
+      this.timeoutId = setTimeout(this.isBalanced, 50); // Set a new timeout
     },
   },
 };
